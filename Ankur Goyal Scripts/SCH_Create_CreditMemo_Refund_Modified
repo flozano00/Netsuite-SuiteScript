@@ -1,0 +1,128 @@
+function schedulerFunction_CreateCreditRefund(type){
+
+	try {
+		var i_context = nlapiGetContext();
+
+		var inv_filters = new Array();
+		//inv_filters.push(new nlobjSearchFilter('internalid', null, 'anyOf', 1645741));
+
+    /**
+   Saved Search Name: Open Credit Memo *** Do Not Edit: Results
+	 Saved Search ID: customsearch_create_open_creditrefund
+	 Saved Search Criteria: Main Line	is true
+ 												  Date:	is within 8/1/2013 and 5/1/2018
+ 													Name:	is any of 6195096 ATHQ (Amazon) FBA, 6191676 ATHQ (NO LONGER USED)
+ 													Type:	is Credit Memo
+ 													Status:	is Credit Memo:Open
+	Saved Search Result: Date
+                       Internal ID
+											 Name
+
+
+
+		*/
+		var invoice_search = nlapiLoadSearch('transaction', 'customsearch_create_open_creditrefund');
+
+		if (invoice_search != null && invoice_search != '' && invoice_search != undefined) {
+			invoice_search.addFilters(inv_filters);
+ 		//Understand this concept to ensure your knowledge of netsuite.
+			var resultset = invoice_search.runSearch();
+			var searchid = 0;
+	  //Here we have a variable with a j in it what's the use for this ?
+			var j = 0;
+   //Here we have a do loop to further understand the reason for this. Do this loop.
+			do {
+	// doing a mapping search concept ? understand the getResults function I'm quite not sure the reason for this.
+				var mapping_search = resultset.getResults(searchid, searchid + 1000);
+  //when mapping_search is not null and not empty and not undefined. I'm not sure why he is using mapping_search
+				if (mapping_search != null && mapping_search != '' && mapping_search != undefined) {
+	//Stopped analyzing here.
+					for (var rs in mapping_search) {
+						var result = mapping_search[rs];
+						var columns = result.getAllColumns();
+						var columnLen = columns.length;
+
+						var internalid = '';
+						var TranDate = '';
+						var customer = '';
+
+						for (var j = 0; j < columnLen; j++) {
+							var column = columns[j];
+							var LabelName = column.getLabel();
+							var fieldName = column.getName();
+							var value = result.getValue(column);
+							//var text = result.getText(column);
+
+							if (fieldName == 'internalid') {
+								internalid = value
+							}
+							if (fieldName == 'trandate') {
+								TranDate = value;
+							}
+							if (fieldName == 'entity') {
+								customer = value;
+							}
+						}
+						try {
+							var applyIdToApply = internalid;
+							var custID = customer;
+							var acctID = 921;
+							var paymethID = 12;
+							var o_NewrefundObj = nlapiCreateRecord('customerrefund', {
+								recordmode: 'dynamic'
+							});
+							o_NewrefundObj.setFieldValue('customform', 220);
+
+							o_NewrefundObj.setFieldValue('trandate', TranDate);
+							o_NewrefundObj.setFieldValue('customer', custID);
+							o_NewrefundObj.setFieldValue('paymentmethod', paymethID);
+							o_NewrefundObj.setFieldValue('account', acctID);
+							o_NewrefundObj.setFieldValue('custbody_auto_create_trans', 'T');
+
+							var lineCount = o_NewrefundObj.getLineItemCount('apply');
+							nlapiLogExecution('DEBUG', 'lines', lineCount);
+							for (var i = 1; i <= lineCount; i++) {
+								o_NewrefundObj.selectLineItem('apply', i);
+								var applyID = o_NewrefundObj.getCurrentLineItemValue('apply', 'doc');
+								var amountRemaining = o_NewrefundObj.getCurrentLineItemValue('apply', 'due');
+
+								if (applyID == applyIdToApply) {
+									nlapiLogExecution('DEBUG', 'applyID : amountRemaining : applyIdToApply', applyID + ' : ' + amountRemaining + ' : ' + applyIdToApply);
+									o_NewrefundObj.setCurrentLineItemValue('apply', 'apply', 'T');
+									o_NewrefundObj.setCurrentLineItemValue('apply', 'amount', amountRemaining);
+									o_NewrefundObj.commitLineItem('apply');
+								}
+							}
+
+							o_NewrefundObj.setFieldValue('tranid','');
+							var RefundId = nlapiSubmitRecord(o_NewrefundObj, true, false);
+							nlapiLogExecution('DEBUG', 'SCH Create Credit Refund', 'RefundId -->' + RefundId);
+						}
+						catch (ex) {
+							nlapiLogExecution('DEBUG', 'SCH Create Credit Refund', 'Inner Execption -->' + ex);
+						}
+
+						var i_usage_end = i_context.getRemainingUsage();
+						//nlapiLogExecution('DEBUG', 'SCH Create Credit Refund', ' *********** Usage end **********-->' + i_usage_end);
+
+						if (i_usage_end <= 500) {
+							var stateMain = nlapiYieldScript();
+
+							if (stateMain.status == 'RESUME') {
+								nlapiLogExecution('DEBUG', 'Resum Scripts', ' *********** Resume an scripts **********-->');
+							}
+						}
+						searchid++;
+
+					}
+				}
+			}
+			while (mapping_search.length >= 1000);
+		}
+	}
+	catch (Execption) {
+		nlapiLogExecution('DEBUG', 'SCH Create Invoice Payment', ' Execption -->' + Execption);
+	}
+}
+
+// END SCHEDULED FUNCTION ===============================================
