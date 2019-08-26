@@ -320,7 +320,7 @@ function lineInit_setDisabled(type){
 
 // BEGIN VALIDATE LINE ==============================================
 
-function validateLine_setTransferPrice(type){
+function validateLine_setTransferPrice_modified(type){
 
 	/*  On validate line:
 	 - EXPLAIN THE PURPOSE OF THIS FUNCTION
