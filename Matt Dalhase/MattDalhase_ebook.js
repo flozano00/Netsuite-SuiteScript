@@ -28,3 +28,15 @@ renamed.*/
 /*
 First, the syntax is very unforgiving. You may not use double quotes
 (“) only single quotes (‘), or the expression will be invalid.*/
+
+//SuiteScript 2.0 On the Browser
+
+require(['N/search'], function(search){
+  var searchObj = search.load({
+    id: 'customsearch_demo_contact_search'
+  });
+  console.log("Criteria: ");
+  console.log(JSON.stringify(searchObj.filterExpression));
+  console.log("Column: ");
+  console.log(JSON.stringify(searchObj.columns));
+});
