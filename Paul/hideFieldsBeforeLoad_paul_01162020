@@ -1,0 +1,62 @@
+function hideColumnBeforeLoad(type, form, request)
+{
+	nlapiLogExecution('DEBUG', 'Script Begin:' , '<<< Script Begin >>>');
+	nlapiLogExecution('DEBUG', 'nlapiGetRole():' , nlapiGetRole());
+	nlapiLogExecution('DEBUG', 'nlapiGetContext():' , nlapiGetContext());
+	nlapiLogExecution('DEBUG', 'type:' , type);
+
+	if(type == 'delete'){nlapiLogExecution('DEBUG', 'Script End:' , '<<< Script End - Record is being deleted. >>>');return true;}
+
+	//This isn't really necessary if Azar wants to only hide it for certain roles because of the if statements. However, this is here in case
+	//they ever want to only exclude certain roles.
+	//if(nlapiGetRole() == 3){nlapiLogExecution('DEBUG', 'Script End:' , '<<< Script End - Admin viewing page, do not hide. >>>');return true;}
+
+	//There can be multiple if's or whatever is necessary here to get the fields as desired.
+
+	//1044 - AD Full Mobile Operator FULL ACCESS
+	//1051 - AD Full Mobile Operator NO Adjustments
+	//1048 Warehouse 12/23/2019
+	//1055	AD - Warehouse Manager 01/08/2020
+
+	if(nlapiGetRole() == 1048 || nlapiGetRole() = 1055)
+	/*
+	  Put Body fields to hide here.
+	*/
+	{
+		var bodyFieldsToHide = nlapiGetField('billaddress');
+			if(bodyFieldsToHide){bodyFieldsToHide.setDisplayType('hidden');}
+			  bodyFieldsToHide = nlapiGetField('total');
+			if(bodyFieldsToHide){bodyFieldsToHide.setDisplayType('hidden');}
+		var bodyFieldsToHide = nlapigetField('')
+
+
+		var sublistColumnToHide = nlapiGetLineItemField('item', 'price');
+			if(sublistColumnToHide){sublistColumnToHide.setDisplayType('hidden');}
+	//Rate Line Item Field.
+			sublistColumnToHide = nlapiGetLineItemField('item', 'rate');
+			if(sublistColumnToHide){sublistColumnToHide.setDisplayType('hidden');}
+ 		//Amount
+			sublistColumnToHide = nlapiGetLineItemField('item', 'amount');
+			if(sublistColumnToHide){sublistColumnToHide.setDisplayType('hidden');}
+ 		//Tax Code
+			sublistColumnToHide = nlapiGetLineItemField('item', 'taxcode');
+			if(sublistColumnToHide){sublistColumnToHide.setDisplayType('hidden');}
+			sublistColumnToHide = nlapiGetLineItemField('item', 'taxrate1');
+			if(sublistColumnToHide){sublistColumnToHide.setDisplayType('hidden');}
+			sublistColumnToHide = nlapiGetLineItemField('item', 'estgrossprofit');
+			if(sublistColumnToHide){sublistColumnToHide.setDisplayType('hidden');}
+			sublistColumnToHide = nlapiGetLineItemField('item', 'estgrossprofitpercent');
+			if(sublistColumnToHide){sublistColumnToHide.setDisplayType('hidden');}
+			sublistColumnToHide = nlapiGetLineItemField('item', 'totalcostestimate');
+			if(sublistColumnToHide){sublistColumnToHide.setDisplayType('hidden');}
+
+
+		var sublistToHide = form.getSubList('payment');
+			if(sublistToHide){sublistToHide.setDisplayType('hidden');}
+			sublistToHide = form.getSubList('paymentevent');
+			if(sublistToHide){sublistToHide.setDisplayType('hidden');}
+	}
+
+	nlapiLogExecution('DEBUG', 'Script End:' , '<<< Script End >>>');
+	return true;
+}
